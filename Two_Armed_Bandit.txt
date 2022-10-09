@@ -1,0 +1,134 @@
+
+import matplotlib.pyplot as plt   # normal plotting
+import numpy as np
+
+from math import log, pi,log,floor       # import whatever you want from math
+from numpy.random import seed, random, randint, choice
+from collections import Counter
+
+%matplotlib inline
+
+Programming Problem
+This problem concerns a common situation in practical probability: you have a random process whose PDF is unknown to you except through experiments. A simple version of this is the biased coin which we first saw in discussion and which is the subject of problem 6 in this homework.
+
+The Two-Armed Bandit
+This game, named from a nickname for slot machines (which have two levers to pull and steal your money!), is played by a single player who has two coins:
+
+AA with a probability of heads p_Ap 
+A
+​
+ , and
+BB with a probability of head p_Bp 
+B
+​
+ ,
+
+The player does not know the probabilities p_Ap 
+A
+​
+  and p_Bp 
+B
+​
+  and the coins are otherwise identical.
+
+One round of the game is played as follows: the player chooses one of the coins and flips it. If the result is heads, the player wins 1 point; if tails the player loses 1 point (which can be thought of as a net profit of -1−1 points). The game is played for some large number of rounds nn (though this is not important, and you might as well think of the game as continuing infinitely).
+
+The question is one of strategy: how do you maximize the points won?
+
+At first glance it may seem like you can do no better than us a random strategy:
+
+RS: In each round, uniformly at random choose either A or B, say by using a third, fair coin, choosing A if heads, and B if tails.
+
+However, a strategy of "win stay, lose shift" has been proposed to optimize one's chances of success. This strategy is simple:
+
+WSLS: In the first round, use coin A. After that, if you win, then flip the same coin again; if you lose, switch to the other coin.
+
+This strategy has an intuitive appeal, because you would think that over a large number of rounds, the coin with the higher probability would tend to be flipped more often, resulting in more profit.
+
+However, no one has (yet) come up with a rigorous proof that this strategy is better than the random strategy. Hence we must fall back on experiments. In this problem we will investigate these two strategies and see if indeed the "win stay, lose shift" strategy is better than the random strategy.
+
+First, complete the general template below to implement the basic framework for the game, then try the following experiments. Code to print out the results has been included.
+
+(A) Set pa = pb = 0.5. In this case, both strategies should be equivalent. Run the game for 10^510 
+5
+  rounds and print out the results, they should be very close.
+
+(B) Set pa = 0.6 and pb = 0.4 and run for 10^510 
+5
+  rounds. You should see an improvement using WSLS.
+
+(C) Set pa = 0.75 and pb = 0.25 and run for 10^510 
+5
+  rounds. You should see a dramatic improvement.
+
+Try this without the seed (commenting out the line seed(0), in which case you will see the general trend of these experiments, and then include the seed before you submit. The comments below on what to expect assume you have used the seed.
+
+In [2]:
+
+num_trials = 10**5
+def X(p):
+    x1 = random()
+    if x1 < p:
+        return 1
+    return 0
+
+def lets_play(pa,pb,num_trials):
+    
+    # replace by your code:
+    
+    rs = 0                            # points won (could be negative) by RS over num_trial rounds
+    wsls = 0                          # points won (could be negative) by WSLS over num_trial rounds
+    n = 0
+    choose = [0,1]
+    for i in range(num_trials):
+        l = np.random.choice([0,1])
+        if(l == 1):
+            n = pa
+        else:
+            n = pb
+        f = X(n)
+        if (f == 1):
+            rs = rs + 1
+        else:
+            rs = rs - 1
+    
+
+    coin1 = 1
+    c = pa
+    for i in range(num_trials):
+        x = X(c)
+        if(x == 1):
+            wsls = wsls + 1
+        else:
+            wsls = wsls - 1
+            if(coin1 == 1):
+                coin1 = 0
+                c = pb
+            else:
+                coin1 = 1
+                c = pa
+
+                
+        
+    print("Points won with RS:\t",rs)
+    print("Points won with WSLS:\t",wsls)
+    print("\nPercent Improvement:\t",(wsls-rs)/num_trials)   
+    print() 
+    
+    
+seed(0)
+
+print("Number of trials:",num_trials,"\n")
+    
+print("(A)\n")
+lets_play(0.5,0.5,num_trials)                  # Percent Improvement should be less than 0.001
+
+
+print("(B)\n")
+lets_play(0.6,0.4,num_trials)                 # Percent Improvement should be around 0.03-0.04 
+
+print("(D)\n")
+lets_play(0.75,0.25,num_trials)                # Percent Improvement should be around 0.25
+Number of trials: 100000 
+
+
